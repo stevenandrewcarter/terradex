@@ -13,6 +13,7 @@ type Project struct {
 	Id          string `json:id`
 	State       map[string]interface{}
 	CreatedDate time.Time
+	Username    string `json:username`
 }
 
 func (e *Project) ToJSON() (*bytes.Buffer, error) {
@@ -20,7 +21,6 @@ func (e *Project) ToJSON() (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("%s", string(b))
 	return bytes.NewBuffer(b), nil
 }
 
@@ -29,7 +29,6 @@ func (e *Project) GetState() (*bytes.Buffer, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("%s", string(b))
 	return bytes.NewBuffer(b), nil
 }
 

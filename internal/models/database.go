@@ -97,7 +97,7 @@ func (d *Database) NewProject(project *Project) error {
 	if err != nil {
 		return err
 	}
-	log.Print(body)
+	log.Printf("Writing new Project Entry - %s", body)
 	_, err = d.Client.Index().
 		Index(indexName).
 		Type("doc").

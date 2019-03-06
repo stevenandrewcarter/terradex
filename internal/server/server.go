@@ -12,6 +12,7 @@ func Routes() *chi.Mux {
 	chi.RegisterMethod("UNLOCK")
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(controllers.AuthenticateCtx)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Route("/{projectID}", func(r chi.Router) {
 		r.Use(controllers.ProjectCtx)

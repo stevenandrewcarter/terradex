@@ -9,29 +9,40 @@ import (
 	"net/http"
 )
 
+func AuthenticateCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth := false
+		username := ""
+		if auth {
+			username, password, authOK := r.BasicAuth()
+			if authOK == false {
+				http.Error(w, "Not authorized", 401)
+				return
+			}
+
+			if username != "username" || password != "password" {
+				http.Error(w, "Not authorized", 401)
+				return
+			}
+			auth := r.Header.Get("Authorization")
+			log.Printf("Authorization header: %s", auth)
+		} else {
+			username = "ANONYMOUS"
+		}
+		ctx := context.WithValue(r.Context(), "username", username)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func ProjectCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var project *models.Project
 		var projectID string
-		var err error
-		db, err := models.NewDatabase()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if projectID = chi.URLParam(r, "projectID"); projectID != "" {
-			project, err = db.GetProjectByID(projectID)
-		} else {
+		projectID = chi.URLParam(r, "projectID")
+		if projectID == "" {
 			render.Render(w, r, ErrNotFound)
 			return
 		}
-		if r.Method == "POST" {
-			project = &models.Project{Id: projectID}
-		} else if err != nil {
-			render.Render(w, r, ErrNotFound)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), "project", project)
+		ctx := context.WithValue(r.Context(), "projectID", projectID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -67,40 +78,36 @@ func ErrInvalidRequest(err error) render.Renderer {
 }
 
 func GetProject(w http.ResponseWriter, r *http.Request) {
-	// ctx := r.Context()
+	projectID := r.Context().Value("projectID").(string)
 	db, err := models.NewDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
-	var projectID string
 	var project *models.Project
-	if projectID = chi.URLParam(r, "projectID"); projectID != "" {
-		project, err = db.GetProjectByID(projectID)
-		if err != nil {
-			http.Error(w, http.StatusText(400), 400)
-		}
-	}
-	// project, ok := ctx.Value("project").(*models.Project)
-	w.WriteHeader(200)
-	jsonBody, err := project.GetState()
+	project, err = db.GetProjectByID(projectID)
 	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
+		log.Printf("No existing project exists for %s - %s", projectID, err.Error())
+		// http.Error(w, http.StatusText(400), 400)
 	}
-	w.Write([]byte(jsonBody.Bytes()))
+	w.WriteHeader(200)
+	if project != nil {
+		jsonBody, err := project.GetState()
+		if err != nil {
+			http.Error(w, http.StatusText(500), 500)
+		}
+		w.Write([]byte(jsonBody.Bytes()))
+	}
 }
 
 func SaveProject(w http.ResponseWriter, r *http.Request) {
 	data := &models.ProjectRequest{}
-	var projectID string
-	if projectID = chi.URLParam(r, "projectID"); projectID != "" {
-		data.ProtectedID = projectID
-		data.Project = &models.Project{Id: projectID}
-		data.LoadState(r.Body)
+	projectID := r.Context().Value("projectID").(string)
+	data.ProtectedID = projectID
+	data.Project = &models.Project{
+		Id:       projectID,
+		Username: r.Context().Value("username").(string),
 	}
-	//if err := render.Bind(r, data); err != nil {
-	//	render.Render(w, r, ErrInvalidRequest(err))
-	//	return
-	//}
+	data.LoadState(r.Body)
 	db, err := models.NewDatabase()
 	if err != nil {
 		log.Fatal(err)
@@ -108,9 +115,4 @@ func SaveProject(w http.ResponseWriter, r *http.Request) {
 	db.NewProject(data.Project)
 	render.Status(r, http.StatusCreated)
 	render.Render(w, r, models.NewProjectResponse(data.Project))
-	//body := Body{}
-	//body.parse(r.Body)
-	//log.Print(html.EscapeString(r.URL.Path), " ", r.Method, " - ", body)
-	//// save(body)
-	//w.WriteHeader(200)
 }
