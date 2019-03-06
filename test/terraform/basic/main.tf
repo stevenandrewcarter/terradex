@@ -1,9 +1,9 @@
-resource "null_resource" "test" {
+resource "null_resource" "basic" {
   triggers {
     test = "2"
   }
 }
 
-resource "null_resource" "test1" {
-
+output "result_output" {
+  value = "1"
 }

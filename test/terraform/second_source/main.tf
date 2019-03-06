@@ -1,9 +1,5 @@
-resource "null_resource" "test" {
+resource "null_resource" "second_source" {
   triggers {
     test = "2"
   }
-}
-
-resource "null_resource" "test1" {
-
 }
