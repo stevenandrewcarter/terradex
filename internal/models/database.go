@@ -30,7 +30,7 @@ func NewDatabase() (*Database, error) {
 		"mappings":{
 			"doc":{
 				"properties": {
-					"Id": {
+					"id": {
 						"type":"keyword"
 					},
 					"CreatedDate": {
@@ -55,11 +55,11 @@ func NewDatabase() (*Database, error) {
 }
 
 func (d *Database) GetProjectByID(id string) (*Project, error) {
-	termQuery := elastic.NewTermQuery("Id", id)
+	termQuery := elastic.NewTermQuery("id", id)
 	res, err := d.Client.Search().
 		Index(indexName).
 		Query(termQuery).
-		Sort("CreatedDate", false).
+		Sort("created_date", false).
 		From(0).Size(10).
 		Pretty(true).
 		Do(context.Background())
@@ -80,7 +80,7 @@ func (d *Database) GetProjectByID(id string) (*Project, error) {
 	// Print the ID and document source for each hit.
 	for _, item := range res.Each(reflect.TypeOf(ptyp)) {
 		if t, ok := item.(Project); ok {
-			log.Printf(" * ID=%s, %s", t.Id, t.State)
+			log.Printf(" * Id=%s, %s", t.Id, t.State)
 			return &t, nil
 		}
 	}

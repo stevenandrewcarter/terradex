@@ -12,7 +12,7 @@ import (
 func AuthenticateCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		auth := false
-		username := ""
+		username := "ANONYMOUS"
 		if auth {
 			username, password, authOK := r.BasicAuth()
 			if authOK == false {
@@ -24,10 +24,7 @@ func AuthenticateCtx(next http.Handler) http.Handler {
 				http.Error(w, "Not authorized", 401)
 				return
 			}
-			auth := r.Header.Get("Authorization")
-			log.Printf("Authorization header: %s", auth)
-		} else {
-			username = "ANONYMOUS"
+			log.Printf("User %s authenticated", username)
 		}
 		ctx := context.WithValue(r.Context(), "username", username)
 		next.ServeHTTP(w, r.WithContext(ctx))

@@ -10,10 +10,10 @@ import (
 )
 
 type Project struct {
-	Id          string `json:id`
-	State       map[string]interface{}
-	CreatedDate time.Time
-	Username    string `json:username`
+	Id          string                 `json:"id"`
+	State       map[string]interface{} `json:"state"`
+	CreatedDate time.Time              `json:"created_date"`
+	Username    string                 `json:"username"`
 }
 
 func (e *Project) ToJSON() (*bytes.Buffer, error) {
