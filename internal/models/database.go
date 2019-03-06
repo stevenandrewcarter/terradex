@@ -59,7 +59,7 @@ func (d *Database) GetProjectByID(id string) (*Project, error) {
 	res, err := d.Client.Search().
 		Index(indexName).
 		Query(termQuery).
-		Sort("CreatedDate", true).
+		Sort("CreatedDate", false).
 		From(0).Size(10).
 		Pretty(true).
 		Do(context.Background())
@@ -70,7 +70,7 @@ func (d *Database) GetProjectByID(id string) (*Project, error) {
 	// Print the response status, number of results, and request duration.
 	log.Printf(
 		"[---] %d hits; took: %dms",
-		int(total), // int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64)),
+		int(total),
 		res.TookInMillis,
 	)
 	if total == 0 {
