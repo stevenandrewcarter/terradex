@@ -67,7 +67,26 @@ func ErrInvalidRequest(err error) render.Renderer {
 }
 
 func GetProject(w http.ResponseWriter, r *http.Request) {
+	// ctx := r.Context()
+	db, err := models.NewDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var projectID string
+	var project *models.Project
+	if projectID = chi.URLParam(r, "projectID"); projectID != "" {
+		project, err = db.GetProjectByID(projectID)
+		if err != nil {
+			http.Error(w, http.StatusText(400), 400)
+		}
+	}
+	// project, ok := ctx.Value("project").(*models.Project)
 	w.WriteHeader(200)
+	jsonBody, err := project.GetState()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+	}
+	w.Write([]byte(jsonBody.Bytes()))
 }
 
 func SaveProject(w http.ResponseWriter, r *http.Request) {

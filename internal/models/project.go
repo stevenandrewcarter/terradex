@@ -6,16 +6,26 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"time"
 )
 
 type Project struct {
-	Id    string `json:id`
-	State map[string]interface{}
-	CreateDate string
+	Id          string `json:id`
+	State       map[string]interface{}
+	CreatedDate time.Time
 }
 
-func (e *Project) toJSON() (*bytes.Buffer, error) {
+func (e *Project) ToJSON() (*bytes.Buffer, error) {
 	b, err := json.Marshal(e)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("%s", string(b))
+	return bytes.NewBuffer(b), nil
+}
+
+func (e *Project) GetState() (*bytes.Buffer, error) {
+	b, err := json.Marshal(e.State)
 	if err != nil {
 		return nil, err
 	}

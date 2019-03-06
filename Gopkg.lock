@@ -2,18 +2,6 @@
 
 
 [[projects]]
-  digest = "1:2af3a6e1f12e54cef95c6051cd1cb1e154629a4b82c692ac8a92f00259f570eb"
-  name = "github.com/elastic/go-elasticsearch"
-  packages = [
-    ".",
-    "esapi",
-    "estransport",
-  ]
-  pruneopts = "UT"
-  revision = "3aa68f5e96e138fa4dafc9403b10674b4310a632"
-  version = "v0.0.0"
-
-[[projects]]
   digest = "1:631757aef84dd471e4ba8242ac6affcccfc2c4c6d9c8c45e47b0d8fe8fd82de1"
   name = "github.com/go-chi/chi"
   packages = [
@@ -39,6 +27,31 @@
   pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5bf23f15fd4550fa19e9fbc8e9fd2e254444a01f4644ad835b5389d1f7d91077"
+  name = "github.com/mailru/easyjson"
+  packages = [
+    ".",
+    "buffer",
+    "jlexer",
+    "jwriter",
+  ]
+  pruneopts = "UT"
+  revision = "6243d8e04c3f819e79757e8bc3faa15c3cb27003"
+
+[[projects]]
+  digest = "1:d1da5ee400cc3c39cf7d920c2db4b04d9407e24a917bf8b99a183aa024081871"
+  name = "github.com/olivere/elastic"
+  packages = [
+    ".",
+    "config",
+    "uritemplates",
+  ]
+  pruneopts = "UT"
+  revision = "407a1d940dcc89e279c579eb393d0bdde8fd9ac4"
+  version = "v6.2.16"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -68,11 +81,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/elastic/go-elasticsearch",
-    "github.com/elastic/go-elasticsearch/esapi",
     "github.com/go-chi/chi",
     "github.com/go-chi/chi/middleware",
     "github.com/go-chi/render",
+    "github.com/olivere/elastic",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
   ]
