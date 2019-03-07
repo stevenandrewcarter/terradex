@@ -51,8 +51,8 @@ func (e *Project) Lock() error {
 	if db, err := newDatabase(); err != nil {
 		log.Fatal(err)
 	} else {
-		if err = db.GetLockByID(e.Id); err != nil {
-			return db.WriteLock(e.Id)
+		if err = db.getLockByID(e.Id); err != nil {
+			return db.writeLock(e)
 		}
 	}
 	return nil
@@ -62,8 +62,8 @@ func (e *Project) Unlock() error {
 	if db, err := newDatabase(); err != nil {
 		return err
 	} else {
-		if err = db.GetLockByID(e.Id); err == nil {
-			if err = db.DeleteLockByID(e.Id); err != nil {
+		if err = db.getLockByID(e.Id); err == nil {
+			if err = db.deleteLockByID(e.Id); err != nil {
 				return err
 			}
 		} else {
@@ -75,9 +75,9 @@ func (e *Project) Unlock() error {
 
 func (e *Project) Save() error {
 	if db, err := newDatabase(); err != nil {
-		log.Fatal(err)
+		return err
 	} else {
-		return db.NewProject(e)
+		return db.newProject(e)
 	}
 }
 
@@ -86,7 +86,7 @@ func GetProjectById(id string) (*Project, error) {
 		return nil, err
 	} else {
 		var project *Project
-		if project, err = db.GetProjectByID(id); err != nil {
+		if project, err = db.getProjectByID(id); err != nil {
 			log.Printf("No existing project exists for %s - %s", id, err.Error())
 		}
 		return project, nil

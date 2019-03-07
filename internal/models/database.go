@@ -17,12 +17,11 @@ type Database struct {
 
 func newDatabase() (*Database, error) {
 	db := Database{}
-	es, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"), elastic.SetSniff(false))
-	if err != nil {
+	if es, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"), elastic.SetSniff(false)); err != nil {
 		return nil, err
-	}
-	db.Client = es
-	indexParams := `{
+	} else {
+		db.Client = es
+		indexParams := `{
 		"settings":{
 			"number_of_shards":1,
 			"number_of_replicas":0
@@ -40,21 +39,21 @@ func newDatabase() (*Database, error) {
 			}
 		}
 	}`
-	exists, err := es.IndexExists(indexName).Do(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		// Create an index
-		_, err = db.Client.CreateIndex(indexName).BodyJson(indexParams).Do(context.Background())
-		if err != nil {
+		if exists, err := es.IndexExists(indexName).Do(context.Background()); err != nil {
 			return nil, err
+		} else {
+			if !exists {
+				// Create an index
+				if _, err = db.Client.CreateIndex(indexName).BodyJson(indexParams).Do(context.Background()); err != nil {
+					return nil, err
+				}
+			}
+			return &db, nil
 		}
 	}
-	return &db, nil
 }
 
-func (d *Database) GetProjectByID(id string) (*Project, error) {
+func (d *Database) getProjectByID(id string) (*Project, error) {
 	query := elastic.NewBoolQuery()
 	query.Must(elastic.NewTermQuery("id", id))
 	query.MustNot(elastic.NewTermQuery("type", "lock"))
@@ -89,7 +88,7 @@ func (d *Database) GetProjectByID(id string) (*Project, error) {
 	return nil, nil
 }
 
-func (d *Database) DeleteLockByID(id string) error {
+func (d *Database) deleteLockByID(id string) error {
 	query := elastic.NewBoolQuery()
 	query.Must(elastic.NewTermQuery("id", id))
 	query.Filter(elastic.NewTermQuery("type", "lock"))
@@ -104,7 +103,7 @@ func (d *Database) DeleteLockByID(id string) error {
 	return nil
 }
 
-func (d *Database) GetLockByID(id string) error {
+func (d *Database) getLockByID(id string) error {
 	query := elastic.NewBoolQuery()
 	query.Must(elastic.NewTermQuery("id", id))
 	query.Filter(elastic.NewTermQuery("type", "lock"))
@@ -130,48 +129,39 @@ func (d *Database) GetLockByID(id string) error {
 	return nil
 }
 
-func (d *Database) WriteLock(id string) error {
-	project := Project{
-		Id:          id,
-		Type:        "lock",
-		CreatedDate: time.Now(),
-	}
-	body, err := project.ToJSON()
-	if err != nil {
+func (d *Database) writeLock(project *Project) error {
+	if body, err := project.ToJSON(); err != nil {
 		return err
-	}
-	log.Printf("Writing new Lock Entry - %s", body)
-	_, err = d.Client.Index().
-		Index(indexName).
-		Type("doc").
-		BodyJson(project).
-		Refresh("wait_for").
-		Do(context.Background())
-	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+	} else {
+		log.Printf("Writing new Lock Entry - %s", body)
+		_, err = d.Client.Index().
+			Index(indexName).
+			Type("doc").
+			BodyJson(project).
+			Refresh("wait_for").
+			Do(context.Background())
+		if err != nil {
+			log.Fatalf("Error getting response: %s", err)
+		}
 	}
 	return nil
 }
 
-func (d *Database) GetProjectBySlug(id string) (*Project, error) {
-	return nil, nil
-}
-
-func (d *Database) NewProject(project *Project) error {
+func (d *Database) newProject(project *Project) error {
 	project.CreatedDate = time.Now()
-	body, err := project.ToJSON()
-	if err != nil {
+	if body, err := project.ToJSON(); err != nil {
 		return err
-	}
-	log.Printf("Writing new Project Entry - %s", body)
-	_, err = d.Client.Index().
-		Index(indexName).
-		Type("doc").
-		BodyJson(project).
-		Refresh("wait_for").
-		Do(context.Background())
-	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
+	} else {
+		log.Printf("Writing new Project Entry - %s", body)
+		_, err = d.Client.Index().
+			Index(indexName).
+			Type("doc").
+			BodyJson(project).
+			Refresh("wait_for").
+			Do(context.Background())
+		if err != nil {
+			log.Fatalf("Error getting response: %s", err)
+		}
 	}
 	return nil
 }

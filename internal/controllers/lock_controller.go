@@ -15,6 +15,7 @@ func LockProject(w http.ResponseWriter, r *http.Request) {
 		Id:          projectID,
 		Username:    username,
 		CreatedDate: time.Now(),
+		Type:        "lock",
 	}
 	if err := project.Lock(); err != nil {
 		w.WriteHeader(409)
