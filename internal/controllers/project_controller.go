@@ -19,7 +19,6 @@ func AuthenticateCtx(next http.Handler) http.Handler {
 				http.Error(w, "Not authorized", 401)
 				return
 			}
-
 			if username != "username" || password != "password" {
 				http.Error(w, "Not authorized", 401)
 				return
@@ -76,23 +75,17 @@ func ErrInvalidRequest(err error) render.Renderer {
 
 func GetProject(w http.ResponseWriter, r *http.Request) {
 	projectID := r.Context().Value("projectID").(string)
-	db, err := models.NewDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var project *models.Project
-	project, err = db.GetProjectByID(projectID)
-	if err != nil {
-		log.Printf("No existing project exists for %s - %s", projectID, err.Error())
-		// http.Error(w, http.StatusText(400), 400)
-	}
-	w.WriteHeader(200)
-	if project != nil {
-		jsonBody, err := project.GetState()
-		if err != nil {
-			http.Error(w, http.StatusText(500), 500)
+	if project, err := models.GetProjectById(projectID); err != nil {
+		http.Error(w, http.StatusText(500), 500)
+	} else {
+		if project != nil {
+			if jsonBody, err := project.GetState(); err != nil {
+				http.Error(w, http.StatusText(500), 500)
+			} else {
+				w.WriteHeader(200)
+				w.Write([]byte(jsonBody.Bytes()))
+			}
 		}
-		w.Write([]byte(jsonBody.Bytes()))
 	}
 }
 
@@ -105,12 +98,13 @@ func SaveProject(w http.ResponseWriter, r *http.Request) {
 		Username: r.Context().Value("username").(string),
 		Type:     "state",
 	}
-	data.LoadState(r.Body)
-	db, err := models.NewDatabase()
-	if err != nil {
-		log.Fatal(err)
+	if err := data.LoadState(r.Body); err != nil {
+		http.Error(w, http.StatusText(500), 500)
 	}
-	db.NewProject(data.Project)
-	render.Status(r, http.StatusCreated)
-	render.Render(w, r, models.NewProjectResponse(data.Project))
+	if err := data.Save(); err != nil {
+		http.Error(w, http.StatusText(500), 500)
+	} else {
+		render.Status(r, http.StatusCreated)
+		render.Render(w, r, models.NewProjectResponse(data.Project))
+	}
 }

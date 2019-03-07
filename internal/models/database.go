@@ -15,7 +15,7 @@ type Database struct {
 	Client *elastic.Client
 }
 
-func NewDatabase() (*Database, error) {
+func newDatabase() (*Database, error) {
 	db := Database{}
 	es, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"), elastic.SetSniff(false))
 	if err != nil {
