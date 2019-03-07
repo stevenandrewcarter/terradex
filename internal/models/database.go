@@ -55,10 +55,12 @@ func NewDatabase() (*Database, error) {
 }
 
 func (d *Database) GetProjectByID(id string) (*Project, error) {
-	termQuery := elastic.NewTermQuery("id", id)
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewTermQuery("id", id))
+	query.MustNot(elastic.NewTermQuery("type", "lock"))
 	res, err := d.Client.Search().
 		Index(indexName).
-		Query(termQuery).
+		Query(query).
 		Sort("created_date", false).
 		From(0).Size(10).
 		Pretty(true).
@@ -85,6 +87,70 @@ func (d *Database) GetProjectByID(id string) (*Project, error) {
 		}
 	}
 	return nil, nil
+}
+
+func (d *Database) DeleteLockByID(id string) error {
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewTermQuery("id", id))
+	query.Filter(elastic.NewTermQuery("type", "lock"))
+	_, err := d.Client.DeleteByQuery().
+		Index(indexName).
+		Type("doc").
+		Query(query).
+		Do(context.Background())
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
+	}
+	return nil
+}
+
+func (d *Database) GetLockByID(id string) error {
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewTermQuery("id", id))
+	query.Filter(elastic.NewTermQuery("type", "lock"))
+	res, err := d.Client.Search().
+		Index(indexName).
+		Query(query).
+		From(0).Size(10).
+		Pretty(true).
+		Do(context.Background())
+	if err != nil {
+		return err
+	}
+	total := res.Hits.TotalHits
+	// Print the response status, number of results, and request duration.
+	log.Printf(
+		"[---] %d hits; took: %dms",
+		int(total),
+		res.TookInMillis,
+	)
+	if total == 0 {
+		return errors.New("Could not find a Project with Id " + id)
+	}
+	return nil
+}
+
+func (d *Database) WriteLock(id string) error {
+	project := Project{
+		Id:          id,
+		Type:        "lock",
+		CreatedDate: time.Now(),
+	}
+	body, err := project.ToJSON()
+	if err != nil {
+		return err
+	}
+	log.Printf("Writing new Lock Entry - %s", body)
+	_, err = d.Client.Index().
+		Index(indexName).
+		Type("doc").
+		BodyJson(project).
+		Refresh("wait_for").
+		Do(context.Background())
+	if err != nil {
+		log.Fatalf("Error getting response: %s", err)
+	}
+	return nil
 }
 
 func (d *Database) GetProjectBySlug(id string) (*Project, error) {

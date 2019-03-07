@@ -103,6 +103,7 @@ func SaveProject(w http.ResponseWriter, r *http.Request) {
 	data.Project = &models.Project{
 		Id:       projectID,
 		Username: r.Context().Value("username").(string),
+		Type:     "state",
 	}
 	data.LoadState(r.Body)
 	db, err := models.NewDatabase()
