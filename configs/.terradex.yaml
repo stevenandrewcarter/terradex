@@ -1,0 +1,6 @@
+########################################################################################################################
+# Default Configuration for the Terradex Project
+
+# All server specific configuration will go here
+server:
+  port: 8080
