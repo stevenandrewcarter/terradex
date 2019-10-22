@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// Projects are the container object that Terraform uses to represent a State. All resources, variables, data, etc
+// are stored within the Project.
 type Project struct {
 	Id          string                 `json:"id"`
 	State       map[string]interface{} `json:"state,omitempty"`
@@ -17,20 +19,23 @@ type Project struct {
 	Type        string                 `json:"type"`
 }
 
-func (e *Project) ToJSON() (*bytes.Buffer, error) {
-	if b, err := json.Marshal(e); err != nil {
+// Convert the given interface into a JSON string.
+func convertToJSON(item interface{}) (*bytes.Buffer, error) {
+	if b, err := json.Marshal(item); err != nil {
 		return nil, err
 	} else {
 		return bytes.NewBuffer(b), nil
 	}
 }
 
+// Convert the entire Project to a JSON string, this is used to store the Project into the database
+func (e *Project) ToJSON() (*bytes.Buffer, error) {
+	return convertToJSON(e)
+}
+
+// Retrieve the State of the Project. State is passed back to Terraform after it has locked the Project.
 func (e *Project) GetState() (*bytes.Buffer, error) {
-	if b, err := json.Marshal(e.State); err != nil {
-		return nil, err
-	} else {
-		return bytes.NewBuffer(b), nil
-	}
+	return convertToJSON(e.State)
 }
 
 func (e *Project) LoadState(reader io.Reader) error {
@@ -48,44 +53,39 @@ func (e *Project) LoadState(reader io.Reader) error {
 }
 
 func (e *Project) Lock() error {
-	if db, err := newDatabase(); err != nil {
-		log.Fatal(err)
-	} else {
-		if err = db.GetLockByID(e.Id); err != nil {
+	return connectToDatabase(func(db Database) error {
+		if locked, err := db.HasLockForID(e.Id); err != nil {
+			return err
+		} else if !locked {
 			return db.WriteLock(e)
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func (e *Project) Unlock() error {
-	if db, err := newDatabase(); err != nil {
-		return err
-	} else {
-		if err = db.GetLockByID(e.Id); err == nil {
-			if err = db.DeleteLockByID(e.Id); err != nil {
-				return err
-			}
-		} else {
+	return connectToDatabase(func(db Database) error {
+		if locked, err := db.HasLockForID(e.Id); err != nil {
 			return err
+		} else if locked {
+			return db.DeleteLockByID(e.Id)
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func (e *Project) Save() error {
-	if db, err := newDatabase(); err != nil {
-		return err
-	} else {
+	return connectToDatabase(func(db Database) error {
 		return db.NewProject(e)
-	}
+	})
 }
 
 func GetProjectById(id string) (*Project, error) {
-	if db, err := newDatabase(); err != nil {
+	var project *Project
+	db, err := newDatabase()
+	if err != nil {
 		return nil, err
 	} else {
-		var project *Project
 		if project, err = db.GetProjectByID(id); err != nil {
 			log.Printf("No existing project exists for %s - %s", id, err.Error())
 		}

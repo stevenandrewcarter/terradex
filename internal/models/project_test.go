@@ -12,6 +12,13 @@ func TestProject_ToJSON(t *testing.T) {
 	}
 }
 
+func TestGetProjectById_UnknownID(t *testing.T) {
+	_, err := GetProjectById("123")
+	if err == nil {
+		t.Errorf("No Project ID with 123 should be found§")
+	}
+}
+
 func TestGetProjectById(t *testing.T) {
 	_, err := GetProjectById("123")
 	if err != nil {
