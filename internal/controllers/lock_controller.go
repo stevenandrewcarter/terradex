@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/stevenandrewcarter/terradex/internal/models"
 	"log"
 	"net/http"
@@ -8,7 +9,6 @@ import (
 )
 
 func LockProject(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Context())
 	if r.Context().Value("projectID") == nil {
 		log.Print("Please provide a projectID in order to lock the project.")
 		w.WriteHeader(400)
@@ -29,7 +29,12 @@ func LockProject(w http.ResponseWriter, r *http.Request) {
 		Type:        "lock",
 	}
 	if err := project.Lock(); err != nil {
-		w.WriteHeader(409)
+		log.Printf("Error: %s", err.Error())
+		http.Error(w, http.StatusText(409), 409)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(project); err != nil {
+			http.Error(w, http.StatusText(500), 500)
+		}
 	}
-	w.WriteHeader(200)
 }

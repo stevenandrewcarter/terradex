@@ -18,12 +18,15 @@ type DatabaseElastic struct {
 var lock = &sync.Mutex{}
 
 func (d *DatabaseElastic) newClient() error {
+	log.Print("[TRC] Initializing new Elastic Client...")
 	lock.Lock()
 	defer lock.Unlock()
 	if d.Client == nil {
+		host := "http://localhost:9200"
+		log.Printf("[TRC] No existing client. Creating new Elastic Client %s", host)
 		err := errors.New("")
 		d.Client, err = elastic.NewClient(
-			elastic.SetURL("http://localhost:9200"),
+			elastic.SetURL(host),
 			elastic.SetSniff(false))
 		if err != nil {
 			return err
@@ -33,6 +36,7 @@ func (d *DatabaseElastic) newClient() error {
 }
 
 func (d *DatabaseElastic) createIndex(indexName string) error {
+	log.Printf("[TRC] Validating Index '%s'", d.IndexName)
 	ctx := context.Background()
 	indexParams := `{
 		"settings":{
@@ -45,7 +49,7 @@ func (d *DatabaseElastic) createIndex(indexName string) error {
 					"id": {
 						"type":"keyword"
 					},
-					"CreatedDate": {
+					"created_date": {
 						"type":"keyword"
 					}
 				}
@@ -56,6 +60,7 @@ func (d *DatabaseElastic) createIndex(indexName string) error {
 		return err
 	} else {
 		if !exists {
+			log.Print("[TRC] Index does not exist, creating new index...")
 			// Create an index
 			if _, err = d.Client.CreateIndex(d.IndexName).BodyJson(indexParams).Do(ctx); err != nil {
 				return err
@@ -69,11 +74,15 @@ func (d *DatabaseElastic) Initialize() error {
 	if err := d.newClient(); err != nil {
 		return err
 	} else {
+		if d.IndexName == "" {
+			d.IndexName = "terradex"
+		}
 		return d.createIndex(d.IndexName)
 	}
 }
 
 func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
+	log.Printf("[TRC] Executing query for %s", id)
 	query := elastic.NewBoolQuery().
 		Must(elastic.NewTermQuery("id", id)).
 		MustNot(elastic.NewTermQuery("type", "lock"))
@@ -90,12 +99,12 @@ func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
 	total := res.Hits.TotalHits
 	// Print the response status, number of results, and request duration.
 	log.Printf(
-		"[---] %d hits; took: %dms",
+		"[TRC] %d hits; took: %dms",
 		int(total),
 		res.TookInMillis,
 	)
 	if total == 0 {
-		return nil, errors.New("Could not find a Project with Id " + id)
+		return nil, nil
 	}
 	var ptyp Project
 	// Print the ID and document source for each hit.
@@ -126,6 +135,7 @@ func (d *DatabaseElastic) DeleteLockByID(id string) error {
 // Search for a Lock for the given project id. If a lock has been created due to another instance of Terraform
 // running, then it will not be possible to execute any Terraform changes until the Lock is released.
 func (d *DatabaseElastic) HasLockForID(id string) (bool, error) {
+	log.Printf("[TRC] Searching for existing lock for Project %s", id)
 	query := elastic.NewBoolQuery().
 		Must(elastic.NewTermQuery("id", id)).
 		Filter(elastic.NewTermQuery("type", "lock"))
@@ -141,7 +151,7 @@ func (d *DatabaseElastic) HasLockForID(id string) (bool, error) {
 	total := res.Hits.TotalHits
 	// Print the response status, number of results, and request duration.
 	log.Printf(
-		"[---] %d hits; took: %dms",
+		"[TRC] %d hits; took: %dms",
 		int(total),
 		res.TookInMillis,
 	)

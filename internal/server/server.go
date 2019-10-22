@@ -7,15 +7,18 @@ import (
 	"github.com/stevenandrewcarter/terradex/internal/controllers"
 )
 
+// Register the Routes used for the Project and the configuration for Chi Routes. Also inject the required Middleware
+// for the different components that the server requires.
 func Routes() *chi.Mux {
 	chi.RegisterMethod("LOCK")
 	chi.RegisterMethod("UNLOCK")
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Use(controllers.AuthenticateCtx)
+	r.Use(AuthenticateCtx)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Route("/{projectID}", func(r chi.Router) {
-		r.Use(controllers.ProjectCtx)
+		r.Use(DatastoreCtx)
+		r.Use(ProjectCtx)
 		r.MethodFunc("LOCK", "/", controllers.LockProject)
 		r.MethodFunc("UNLOCK", "/", controllers.UnlockProject)
 		r.Get("/", controllers.GetProject)

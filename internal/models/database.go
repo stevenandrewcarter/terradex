@@ -18,7 +18,7 @@ func connectToDatabase(cb func(Database) error) error {
 	return cb(&db)
 }
 
-func newDatabase() (Database, error) {
+func NewDatabase() (Database, error) {
 	db := DatabaseElastic{}
 	if err := db.Initialize(); err != nil {
 		return nil, err

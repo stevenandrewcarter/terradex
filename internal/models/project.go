@@ -82,7 +82,7 @@ func (e *Project) Save() error {
 
 func GetProjectById(id string) (*Project, error) {
 	var project *Project
-	db, err := newDatabase()
+	db, err := NewDatabase()
 	if err != nil {
 		return nil, err
 	} else {

@@ -10,8 +10,7 @@ type ProjectResponse struct {
 }
 
 func NewProjectResponse(project *Project) *ProjectResponse {
-	resp := &ProjectResponse{Project: project}
-	return resp
+	return &ProjectResponse{Project: project}
 }
 
 func (rd *ProjectResponse) Render(w http.ResponseWriter, r *http.Request) error {
