@@ -82,7 +82,7 @@ func (d *DatabaseElastic) Initialize() error {
 }
 
 func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
-	log.Printf("[TRC] Executing query for %s", id)
+	log.Printf("[TRC] Searching for a Project with ID '%s'", id)
 	query := elastic.NewBoolQuery().
 		Must(elastic.NewTermQuery("id", id)).
 		MustNot(elastic.NewTermQuery("type", "lock"))
@@ -90,7 +90,7 @@ func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
 		Index(d.IndexName).
 		Query(query).
 		Sort("created_date", false).
-		From(0).Size(10).
+		From(0).Size(1).
 		Pretty(true).
 		Do(context.Background())
 	if err != nil {

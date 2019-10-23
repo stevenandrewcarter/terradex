@@ -37,7 +37,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.terradex.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&port, "port", "p", "8080", "The Port that Terradex will listen on.")
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	_ = viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 }
 
 func initConfig() {

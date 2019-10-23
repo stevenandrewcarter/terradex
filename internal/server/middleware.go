@@ -35,7 +35,7 @@ func AuthenticateCtx(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(401), 401)
 			return
 		}
-		log.Printf("[TRC] User %s authenticated", username)
+		log.Printf("[TRC] User '%s' authenticated", username)
 		ctx := context.WithValue(r.Context(), "username", username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -51,7 +51,7 @@ func ProjectCtx(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(400), 400)
 			return
 		}
-		log.Printf("[TRC] Attempting to load ProjectID %s", projectID)
+		log.Printf("[TRC] Attempting to load ProjectID '%s'", projectID)
 		db := r.Context().Value("database").(models.Database)
 		project, err := db.GetProjectByID(projectID)
 		if err != nil {
