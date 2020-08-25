@@ -3,7 +3,8 @@ package models
 import (
 	"context"
 	"errors"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
+	"github.com/spf13/viper"
 	"log"
 	"reflect"
 	"sync"
@@ -21,8 +22,8 @@ func (d *DatabaseElastic) newClient() error {
 	log.Print("[TRC] Initializing new Elastic Client...")
 	lock.Lock()
 	defer lock.Unlock()
+	host := viper.Get("elasticsearch_host").(string)
 	if d.Client == nil {
-		host := "http://localhost:9200"
 		log.Printf("[TRC] No existing client. Creating new Elastic Client %s", host)
 		err := errors.New("")
 		d.Client, err = elastic.NewClient(
@@ -43,15 +44,13 @@ func (d *DatabaseElastic) createIndex(indexName string) error {
 			"number_of_shards":1,
 			"number_of_replicas":0
 		},
-		"mappings":{
-			"doc":{
-				"properties": {
-					"id": {
-						"type":"keyword"
-					},
-					"created_date": {
-						"type":"keyword"
-					}
+		"mappings":{	
+			"properties": {
+				"id": {
+					"type":"keyword"
+				},
+				"created_date": {
+					"type":"keyword"
 				}
 			}
 		}
@@ -96,7 +95,7 @@ func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	total := res.Hits.TotalHits
+	total := res.Hits.TotalHits.Value
 	// Print the response status, number of results, and request duration.
 	log.Printf(
 		"[TRC] %d hits; took: %dms",
@@ -148,7 +147,7 @@ func (d *DatabaseElastic) HasLockForID(id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	total := res.Hits.TotalHits
+	total := res.Hits.TotalHits.Value
 	// Print the response status, number of results, and request duration.
 	log.Printf(
 		"[TRC] %d hits; took: %dms",

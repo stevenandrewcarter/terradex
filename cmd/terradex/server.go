@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Long: `Terradex is a Terraform Support Tool for storing remote state with authentication / authorization models
 		     and provides a visualization tool to allow you to see how the deployments are going.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Printf(`Starting Terradex (Version 0.0.1)
+		log.Printf(`Starting Terradex (Version 0.1.0)
  ____  ____  ____  ____   __   ____  ____  _  _ 
 (_  _)(  __)(  _ \(  _ \ / _\ (    \(  __)( \/ )
   )(   ) _)  )   / )   //    \ ) D ( ) _)  )  ( 
@@ -38,6 +38,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.terradex.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&port, "port", "p", "8080", "The Port that Terradex will listen on.")
 	_ = viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	viper.SetEnvPrefix("dex")
+	viper.BindEnv("elasticsearch_host")
 }
 
 func initConfig() {

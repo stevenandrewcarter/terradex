@@ -3,10 +3,24 @@ package server
 import (
 	"context"
 	"github.com/go-chi/chi"
+	"github.com/spf13/viper"
 	"github.com/stevenandrewcarter/terradex/internal/models"
 	"log"
 	"net/http"
 )
+
+func ConfigCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Print("[TRC] Initializing Config Context...")
+		host := viper.Get("elasticsearch.host")
+		if host == nil {
+			host = viper.Get("elasticsearch_host")
+		}
+		log.Print(host)
+		ctx := context.WithValue(r.Context(), "elasticsearch.host", host)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
 
 // Initialize the connection to the data store as a middleware context call. This means that if the database is not
 // available on any call it will fail here first.
