@@ -38,7 +38,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.terradex.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&port, "port", "p", "8080", "The Port that Terradex will listen on.")
 	_ = viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
-	viper.SetEnvPrefix("dex")
+	viper.SetEnvPrefix("terradex")
 	viper.BindEnv("elasticsearch_host")
 }
 

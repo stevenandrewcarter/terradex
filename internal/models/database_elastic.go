@@ -47,10 +47,10 @@ func (d *DatabaseElastic) createIndex(indexName string) error {
 		"mappings":{	
 			"properties": {
 				"id": {
-					"type":"keyword"
+					"type":"text"
 				},
 				"created_date": {
-					"type":"keyword"
+					"type":"date"
 				}
 			}
 		}
@@ -183,7 +183,6 @@ func (d *DatabaseElastic) NewProject(project *Project) error {
 		log.Printf("Writing new Project Entry - %s", body)
 		_, err = d.Client.Index().
 			Index(d.IndexName).
-			Type("doc").
 			BodyJson(project).
 			Refresh("wait_for").
 			Do(context.Background())

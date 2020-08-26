@@ -6,12 +6,12 @@ services:
       - discovery.type=single-node
     ports: ['9200:9200']
 
-  terradex:
-    build: .
-    ports: ['8080:8080']
-    environment:
-      - DEX_ELASTICSEARCH_HOST=http://elasticsearch:9200
-    depends_on: ['elasticsearch']
+#  terradex:
+#    build: .
+#    ports: ['8080:8080']
+#    environment:
+#      - TERRADEX_ELASTICSEARCH_HOST=http://elasticsearch:9200
+#    depends_on: ['elasticsearch']
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.9.0

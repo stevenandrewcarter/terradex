@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/stevenandrewcarter/terradex/internal/models"
 	"log"
@@ -26,7 +27,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 
 func SaveProject(w http.ResponseWriter, r *http.Request) {
 	data := &models.ProjectRequest{}
-	projectID := r.Context().Value("projectID").(string)
+	projectID := chi.URLParam(r, "projectID")
 	data.ProtectedID = projectID
 	data.Project = &models.Project{
 		Id:       projectID,
