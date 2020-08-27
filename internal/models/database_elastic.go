@@ -22,13 +22,15 @@ func (d *DatabaseElastic) newClient() error {
 	log.Print("[TRC] Initializing new Elastic Client...")
 	lock.Lock()
 	defer lock.Unlock()
-	host := viper.Get("elasticsearch_host").(string)
+	host := "http://localhost:9200"
+	hostConfig := viper.Get("elasticsearch_host")
+	if hostConfig != nil {
+		host = hostConfig.(string)
+	}
 	if d.Client == nil {
 		log.Printf("[TRC] No existing client. Creating new Elastic Client %s", host)
 		err := errors.New("")
-		d.Client, err = elastic.NewClient(
-			elastic.SetURL(host),
-			elastic.SetSniff(false))
+		d.Client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false))
 		if err != nil {
 			return err
 		}
@@ -97,11 +99,7 @@ func (d *DatabaseElastic) GetProjectByID(id string) (*Project, error) {
 	}
 	total := res.Hits.TotalHits.Value
 	// Print the response status, number of results, and request duration.
-	log.Printf(
-		"[TRC] %d hits; took: %dms",
-		int(total),
-		res.TookInMillis,
-	)
+	log.Printf("[TRC] %d hits; took: %dms", int(total), res.TookInMillis)
 	if total == 0 {
 		return nil, nil
 	}
@@ -122,7 +120,6 @@ func (d *DatabaseElastic) DeleteLockByID(id string) error {
 		Filter(elastic.NewTermQuery("type", "lock"))
 	_, err := d.Client.DeleteByQuery().
 		Index(d.IndexName).
-		Type("doc").
 		Query(query).
 		Do(context.Background())
 	if err != nil {
@@ -149,11 +146,7 @@ func (d *DatabaseElastic) HasLockForID(id string) (bool, error) {
 	}
 	total := res.Hits.TotalHits.Value
 	// Print the response status, number of results, and request duration.
-	log.Printf(
-		"[TRC] %d hits; took: %dms",
-		int(total),
-		res.TookInMillis,
-	)
+	log.Printf("[TRC] %d hits; took: %dms", int(total), res.TookInMillis)
 	return total == 0, nil
 }
 
@@ -164,7 +157,6 @@ func (d *DatabaseElastic) WriteLock(project *Project) error {
 		log.Printf("Writing new Lock Entry - %s", body)
 		_, err = d.Client.Index().
 			Index(d.IndexName).
-			Type("doc").
 			BodyJson(project).
 			Refresh("wait_for").
 			Do(context.Background())
