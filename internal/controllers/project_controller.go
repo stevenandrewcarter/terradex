@@ -9,6 +9,11 @@ import (
 )
 
 func GetProject(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Value("project") == nil {
+		log.Print("Please provide a project.")
+		w.WriteHeader(400)
+		return
+	}
 	project := r.Context().Value("project").(*models.Project)
 	if project == nil {
 		http.NotFound(w, r)

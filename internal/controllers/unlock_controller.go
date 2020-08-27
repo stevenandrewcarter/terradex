@@ -8,6 +8,16 @@ import (
 )
 
 func UnlockProject(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Value("projectID") == nil {
+		log.Print("Please provide a projectID in order to lock the project.")
+		w.WriteHeader(400)
+		return
+	}
+	if r.Context().Value("username") == nil {
+		log.Print("Please provide a username in order to lock the project.")
+		w.WriteHeader(400)
+		return
+	}
 	projectID := r.Context().Value("projectID").(string)
 	username := r.Context().Value("username").(string)
 	log.Printf("Unlocking... %s for %s", projectID, username)
