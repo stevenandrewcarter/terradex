@@ -1,5 +1,5 @@
 resource "null_resource" "second_source" {
-  triggers {
+  triggers = {
     test = "2"
   }
 }

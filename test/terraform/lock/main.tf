@@ -1,5 +1,5 @@
 resource "null_resource" "lock" {
-  triggers {
+  triggers = {
     test = "2"
   }
 }
