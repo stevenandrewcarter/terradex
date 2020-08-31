@@ -1,20 +1,21 @@
-package main
+package terradex
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stevenandrewcarter/terradex/internal/server"
-	"log"
-	"net/http"
-	"os"
 )
 
 var port string
 var cfgFile string
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "terradex",
 	Short: "Terradex is a HTTP backend for Terraform state configuration and visualization.",
 	Long: `Terradex is a Terraform Support Tool for storing remote state with authentication / authorization models
@@ -35,9 +36,9 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.terradex.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&port, "port", "p", "8080", "The Port that Terradex will listen on.")
-	_ = viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Config file (default is $HOME/.terradex.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&port, "port", "p", "8080", "The Port that Terradex will listen on.")
+	_ = viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
 	viper.SetEnvPrefix("terradex")
 	viper.BindEnv("elasticsearch_host")
 }

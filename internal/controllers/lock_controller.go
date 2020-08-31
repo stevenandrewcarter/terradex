@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/stevenandrewcarter/terradex/internal/models"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/stevenandrewcarter/terradex/internal/models"
 )
 
 func LockProject(w http.ResponseWriter, r *http.Request) {

@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/stevenandrewcarter/terradex/internal/models"
-	"log"
-	"net/http"
 )
 
 func GetProject(w http.ResponseWriter, r *http.Request) {

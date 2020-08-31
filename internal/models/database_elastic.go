@@ -3,12 +3,13 @@ package models
 import (
 	"context"
 	"errors"
-	"github.com/olivere/elastic/v7"
-	"github.com/spf13/viper"
 	"log"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/olivere/elastic/v7"
+	"github.com/spf13/viper"
 )
 
 type DatabaseElastic struct {

@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/stevenandrewcarter/terradex/internal/models"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/stevenandrewcarter/terradex/internal/models"
 )
 
 func UnlockProject(w http.ResponseWriter, r *http.Request) {

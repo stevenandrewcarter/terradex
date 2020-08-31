@@ -2,11 +2,12 @@ package server
 
 import (
 	"context"
+	"log"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/spf13/viper"
 	"github.com/stevenandrewcarter/terradex/internal/models"
-	"log"
-	"net/http"
 )
 
 func ConfigCtx(next http.Handler) http.Handler {
