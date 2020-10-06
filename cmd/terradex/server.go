@@ -15,11 +15,12 @@ import (
 var port string
 var cfgFile string
 
+// RootCmd - Main Command for Terradex
 var RootCmd = &cobra.Command{
 	Use:   "terradex",
 	Short: "Terradex is a HTTP backend for Terraform state configuration and visualization.",
 	Long: `Terradex is a Terraform Support Tool for storing remote state with authentication / authorization models
-		     and provides a visualization tool to allow you to see how the deployments are going.`,
+	and provides a visualization tool to allow you to see how the deployments are going.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf(`Starting Terradex (Version 0.1.0)
  ____  ____  ____  ____   __   ____  ____  _  _ 
