@@ -12,19 +12,20 @@ func TestProject_ToJSON(t *testing.T) {
 	}
 }
 
-func TestGetProjectById_UnknownID(t *testing.T) {
-	projectId := "1234"
-	_, err := GetProjectById(projectId)
-	if err != nil {
-		t.Errorf("No Project ID with %v should be found", projectId)
-	}
-}
-
 func TestGetProjectById(t *testing.T) {
-	projectId := "123"
-	_, err := GetProjectById(projectId)
-	if err != nil {
-		t.Errorf("Should be able to retrieve project with ID %v", projectId)
+	tests := map[string]struct {
+		projectID string
+	}{
+		"unknownID":  {projectID: "1234"},
+		"successful": {projectID: "123"},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := GetProjectById(tc.projectID)
+			if err != nil {
+				t.Errorf("Should be able to retrieve project with ID %v", tc.projectID)
+			}
+		})
 	}
 }
 

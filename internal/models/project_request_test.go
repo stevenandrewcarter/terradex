@@ -12,6 +12,24 @@ func TestProjectRequest_ToJSON(t *testing.T) {
 	}
 }
 
+func TestGetProjectRequest(t *testing.T) {
+	tests := map[string]struct {
+		project *Project
+	}{
+		"unknownID":  {project: nil},
+		"successful": {project: &Project{}},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			projectRequest := ProjectRequest{}
+			projectRequest.Project = tc.project
+			if err := projectRequest.Bind(nil); err != nil {
+				t.Error("Unexpected error")
+			}
+		})
+	}
+}
+
 func TestProjectRequest_BindShouldFail(t *testing.T) {
 	projectRequest := ProjectRequest{}
 	err := projectRequest.Bind(nil)
@@ -21,10 +39,5 @@ func TestProjectRequest_BindShouldFail(t *testing.T) {
 }
 
 func TestProjectRequest_Bind(t *testing.T) {
-	projectRequest := ProjectRequest{}
-	projectRequest.Project = &Project{}
-	err := projectRequest.Bind(nil)
-	if err != nil {
-		t.Error("Unexpected error")
-	}
+
 }
